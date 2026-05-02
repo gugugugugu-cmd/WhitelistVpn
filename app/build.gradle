@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.muort.Proxy.allwhitelist'
+    namespace 'com.muort.whitelistvpn'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.muort.Proxy.allwhitelist"
+        applicationId "com.muort.whitelistvpn"
         minSdk 21
         targetSdk 34
         versionCode 1

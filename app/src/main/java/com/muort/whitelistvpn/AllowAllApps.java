@@ -1,4 +1,4 @@
-package com.muort.Proxy.allwhitelist;
+package com.muort.whitelistvpn;
 
 import android.app.AndroidAppHelper;
 import android.content.pm.PackageInfo;
