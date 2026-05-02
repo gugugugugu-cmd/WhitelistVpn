@@ -22,6 +22,12 @@ public class AllowAllApps implements IXposedHookLoadPackage {
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
+
+        // 可选：限制只对某个 VPN 应用生效
+        // if (!"你的VPN包名".equals(lpparam.packageName)) {
+        //     return;
+        // }
+
         try {
             XposedHelpers.findAndHookMethod(
                     "android.net.VpnService$Builder",
@@ -38,10 +44,15 @@ public class AllowAllApps implements IXposedHookLoadPackage {
                             XSharedPreferences prefs = new XSharedPreferences(MODULE_PACKAGE, PREF_NAME);
                             prefs.reload();
 
-                            boolean enabled = prefs.getBoolean(Config.KEY_ENABLED, true);
+                            boolean enabled = prefs.getBoolean(Config.KEY_ENABLED, false);
+                            String mode = prefs.getString(Config.KEY_MODE, Config.MODE_OFF);
+
+                            XposedBridge.log("WhitelistVpn package=" + lpparam.packageName
+                                    + " enabled=" + enabled
+                                    + " mode=" + mode);
+
                             if (!enabled) return;
 
-                            String mode = prefs.getString(Config.KEY_MODE, Config.MODE_ALL);
                             PackageManager pm = app.getPackageManager();
 
                             if (Config.MODE_OFF.equals(mode)) {
@@ -51,6 +62,8 @@ public class AllowAllApps implements IXposedHookLoadPackage {
                             if (Config.MODE_ALL.equals(mode)) {
                                 List<PackageInfo> packages =
                                         pm.getInstalledPackages(PackageManager.GET_META_DATA);
+
+                                XposedBridge.log("WhitelistVpn ALL mode, packages=" + packages.size());
 
                                 for (PackageInfo info : packages) {
                                     if (info == null || info.packageName == null) continue;
@@ -67,17 +80,22 @@ public class AllowAllApps implements IXposedHookLoadPackage {
                                 Set<String> selected =
                                         prefs.getStringSet(Config.KEY_SELECTED_PACKAGES, null);
 
-                                if (selected != null) {
-                                    for (String pkg : selected) {
-                                        if (pkg == null || pkg.trim().isEmpty()) continue;
-                                        try {
-                                            XposedHelpers.callMethod(
-                                                    builder,
-                                                    "addAllowedApplication",
-                                                    pkg
-                                            );
-                                        } catch (Throwable ignored) {
-                                        }
+                                int count = selected == null ? 0 : selected.size();
+                                XposedBridge.log("WhitelistVpn SELECTED mode, count=" + count);
+
+                                if (selected == null || selected.isEmpty()) {
+                                    return;
+                                }
+
+                                for (String pkg : selected) {
+                                    if (pkg == null || pkg.trim().isEmpty()) continue;
+                                    try {
+                                        XposedHelpers.callMethod(
+                                                builder,
+                                                "addAllowedApplication",
+                                                pkg
+                                        );
+                                    } catch (Throwable ignored) {
                                     }
                                 }
                             }
@@ -85,9 +103,9 @@ public class AllowAllApps implements IXposedHookLoadPackage {
                     }
             );
 
-            XposedBridge.log("WhitelistVpn: hook installed");
+            XposedBridge.log("WhitelistVpn: hook installed in " + lpparam.packageName);
         } catch (Throwable t) {
-            XposedBridge.log("WhitelistVpn hook failed: " + t);
+            XposedBridge.log("WhitelistVpn hook failed in " + lpparam.packageName + ": " + t);
         }
     }
 }
