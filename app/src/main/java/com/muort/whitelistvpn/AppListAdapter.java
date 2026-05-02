@@ -84,7 +84,8 @@ public class AppListAdapter extends BaseAdapter {
         pkg.setText(app.packageName);
 
         check.setOnCheckedChangeListener(null);
-        check.setChecked.setOnCheckedChangeListener((buttonView, isChecked) -> app.checked = isChecked);
+        check.setChecked(app.checked);
+        check.setOnCheckedChangeListener((buttonView, isChecked) -> app.checked = isChecked);
 
         view.setOnClickListener(v -> {
             app.checked = !app.checked;
