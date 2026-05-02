@@ -8,14 +8,22 @@
         android:allowBackup="false"
         android:supportsRtl="true">
 
-        <!-- LSPosed/Xposed 模块声明 -->
+        <activity android:name=".AppSelectActivity" />
+
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
 
         <meta-data
             android:name="xposeddescription"
-            android:value="Allow all installed apps in VpnService.Builder allowed list" />
+            android:value="Whitelist VPN module" />
 
         <meta-data
             android:name="xposedminversion"
