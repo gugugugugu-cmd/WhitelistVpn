@@ -3,7 +3,10 @@ package com.muort.whitelistvpn;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +20,7 @@ public class AppSelectActivity extends AppCompatActivity {
 
     private ListView listView;
     private Button btnSave;
+    private EditText editSearch;
     private AppListAdapter adapter;
     private final List<AppInfo> appList = new ArrayList<>();
 
@@ -27,11 +31,27 @@ public class AppSelectActivity extends AppCompatActivity {
 
         listView = findViewById(R.id.listViewApps);
         btnSave = findViewById(R.id.btnSaveApps);
+        editSearch = findViewById(R.id.editSearch);
 
         loadApps();
 
         adapter = new AppListAdapter(this, appList);
         listView.setAdapter(adapter);
+
+        editSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.filter(s == null ? "" : s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
 
         btnSave.setOnClickListener(v -> saveSelection());
     }
@@ -58,7 +78,7 @@ public class AppSelectActivity extends AppCompatActivity {
 
     private void saveSelection() {
         Set<String> selected = new HashSet<>();
-        for (AppInfo app : appList) {
+        for (AppInfo app : adapter.getOriginalApps()) {
             if (app.checked) {
                 selected.add(app.packageName);
             }
