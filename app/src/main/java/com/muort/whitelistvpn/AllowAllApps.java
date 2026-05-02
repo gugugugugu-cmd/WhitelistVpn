@@ -24,37 +24,40 @@ public class AllowAllApps implements IXposedHookLoadPackage {
                     new XC_MethodHook() {
                         @Override
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                            if (AndroidAppHelper.currentApplication() == null) {
-                                return;
-                            }
-
-                            Object builder = param.thisObject;
-                            PackageManager packageManager =
-                                    AndroidAppHelper.currentApplication().getPackageManager();
-
-                            List<PackageInfo> packages =
-                                    packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
-
-                            for (PackageInfo info : packages) {
-                                if (info == null || info.packageName == null) {
-                                    continue;
+                            try {
+                                if (AndroidAppHelper.currentApplication() == null) {
+                                    return;
                                 }
 
-                                try {
-                                    XposedHelpers.callMethod(
-                                            builder,
-                                            "addAllowedApplication",
-                                            info.packageName
-                                    );
-                                } catch (Throwable ignored) {
-                                    // 忽略单个应用失败，避免影响 establish()
+                                Object builder = param.thisObject;
+                                PackageManager packageManager =
+                                        AndroidAppHelper.currentApplication().getPackageManager();
+
+                                List<PackageInfo> packages =
+                                        packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
+
+                                for (PackageInfo info : packages) {
+                                    if (info == null || info.packageName == null) {
+                                        continue;
+                                    }
+
+                                    try {
+                                        XposedHelpers.callMethod(
+                                                builder,
+                                                "addAllowedApplication",
+                                                info.packageName
+                                        );
+                                    } catch (Throwable ignored) {
+                                        // 忽略单个应用失败，避免影响 establish()
+                                    }
                                 }
+                            } catch (Throwable t) {
+                                XposedBridge.log("WhitelistVpn beforeHookedMethod error in "
+                                        + lpparam.packageName + ": " + t);
                             }
                         }
                     }
             );
-
-            XposedBridge.log("WhitelistVpn: hook installed in " + lpparam.packageName);
         } catch (Throwable t) {
             XposedBridge.log("WhitelistVpn hook failed in " + lpparam.packageName + ": " + t);
         }
