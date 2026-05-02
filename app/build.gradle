@@ -1,0 +1,41 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.example.whitelistvpn'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.whitelistvpn"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    // 仅在编译时使用，不打包进 APK（Xposed 环境自带）
+    compileOnly 'ro.fortsoft.shv:xposed-api:82' 
+    // 或者使用常见的提供者
+    compileOnly "de.robv.android.xposed:api:82"
+
+}
